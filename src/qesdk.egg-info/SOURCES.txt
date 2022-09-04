@@ -1,0 +1,13 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+src/qesdk.egg-info/PKG-INFO
+src/qesdk.egg-info/SOURCES.txt
+src/qesdk.egg-info/dependency_links.txt
+src/qesdk.egg-info/top_level.txt
+src/qesdk/qedata/__init__.py
+src/qesdk/qedata/api.py
+src/qesdk/qedata/client.py
+src/qesdk/qedata/qedata.thrift
+src/qesdk/qedata/utils.py

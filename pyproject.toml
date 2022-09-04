@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qesdk"
+version = "0.0.3"
+authors = [
+  { name="Scott Zhang", email="scott2011@qq.com" },
+]
+description = "Quantease SDK for quants"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/quantease/qesdk"
+"Bug Tracker" = "https://github.com/quantease/qesdk/issues"
+
