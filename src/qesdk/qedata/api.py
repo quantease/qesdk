@@ -155,14 +155,54 @@ def get_ticks(security, start_date, end_date, count=None, fields=None, overnight
     except Exception as e:
         print("Error:", e.__traceback__.tb_lineno,e)
         return None
-   
 
 @assert_auth
-def get_ticks_test(security, start_date, end_date):
-    security = convert_security(security)
-    start_date = to_date_str(start_date)
-    end_date = to_date_str(end_date)
-    return qedataClient.instance()('get_ticks',**locals())
+def get_securities_list(stype="all",dateWindow=None, exchange="all"):
+    validTypes = ['all', 'options', 'futures', 'spot']
+    if not stype in validTypes:
+        print("stype不合法, 合法值如下： [\'all\', \'options\', \'futures\']")
+        
+        return None
+    validExchanges =['DCE', 'SSE',"SFE","ZCE","INE","CCF","ALL"]
+    exID = exchange.upper()
+    if not exID in validExchanges:
+        print("exchange不合法, 合法值如下:", validExchanges)
+        return None 
+    #print('dataWindow', dateWindow)
+    try:
+        if dateWindow:
+            if len(dateWindow) == 2:
+                if isinstance(dateWindow[0], datetime) or isinstance(dateWindow[0],date):
+                    dateWindow[0] = dateWindow[0].strftime("%Y-%m-%d")
+                if isinstance(dateWindow[1], datetime) or isinstance(dateWindow[1],date):
+                    dateWindow[1] = dateWindow[1].strftime("%Y-%m-%d")
+                curday = datetime.now().strftime("%Y-%m-%d")
+                start_dt  = dateWindow[0] if dateWindow[0] != '' else curday
+                end_dt = dateWindow[1] if dateWindow[1] != '' else curday
+            else:
+                print('dateWindow 格式应为 [start, end].')
+                return None
+            
+            
+            
+            if not isinstance(dateWindow, list)  or not isinstance(start_dt, str) or  not isinstance(end_dt, str):
+                print("不合法的dateWindow, 正确示例:  ['2021-10-11,'2021-12-31']表示日期在2021-10-11到2021-12-31日之间(2021-12-31 当天包含在内) 空字符串''代表今天.")
+                return None
+            if start_dt > end_dt:
+                start_dt, end_dt = end_dt, start_dt
+    except ValueError:
+        print('dateWindow日期格式不对，应该为 %Y-%m-%d, 比如 \'2015-01-01\'')
+        return None
+    if dateWindow:
+        dateWindow = json.dumps(dateWindow)
+    else:
+        dateWindow = json.dumps([])
+    return qedataClient.instance()('get_securities_list',**locals())
+
+@assert_auth
+def get_prod_open_time(instid):
+    instid = convert_security(instid)
+    return qedataClient.instance()('get_prod_open_time',**locals())
 
 @assert_auth
 def get_price(security, start_date, end_date, freq='minute', fields=None, overnight=False, silent=False):

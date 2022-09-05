@@ -19,6 +19,13 @@ from .utils import get_mac_address
 import nest_asyncio
 nest_asyncio.apply()
 
+try:
+    from .config import server_config
+except:
+    server_config = {'host' : '127.0.0.1',
+                     'port' : 6001}    
+
+
 
 __version__='1.0.1'
 
@@ -65,7 +72,7 @@ class qedataClient(object):
             pass
     async def echo(self, name):
         client = await make_aio_client(
-            qedata_thrift.TestService, 'localhost', 6002)#,timeout=30*1000)
+            qedata_thrift.TestService, server_config['host'], server_config['port'])#,timeout=30*1000)
         #setTimeout(client, 30*1000)
         result = await client.echo(name)
         print(result,self._systoken)
@@ -73,7 +80,7 @@ class qedataClient(object):
     
     async def queryData(self, method, **kwargs):
         client = await make_aio_client(
-            qedata_thrift.TestService, 'localhost', 6002, timeout=self.request_timeout)
+            qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=self.request_timeout)
         self.setTimeout(client, self.request_timeout)
         req = qedata_thrift.St_Query_Req()
         req.method_name = method
@@ -95,7 +102,7 @@ class qedataClient(object):
     async def auth(cls, username, authcode):
         global systoken
         client = await make_aio_client(
-            qedata_thrift.TestService, 'localhost', 6002)#,timeout=30*1000)
+            qedata_thrift.TestService, server_config['host'],  server_config['port'])#,timeout=30*1000)
         #setTimeout(client, 30*1000)
         result = await client.auth(username, authcode, True, get_mac_address(), __version__)
         #print(result)
