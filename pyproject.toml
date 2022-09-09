@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qesdk"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
   { name="Scott Zhang", email="scott2011@qq.com" },
 ]
