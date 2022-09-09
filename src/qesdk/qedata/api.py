@@ -204,6 +204,140 @@ def get_prod_open_time(instid):
     instid = convert_security(instid)
     return qedataClient.instance()('get_prod_open_time',**locals())
 
+def is_valid_date(dstr):
+    try:
+        datetime.strptime(dstr, '%Y-%m-%d')
+        return True
+    except:
+        return False
+    
+@assert_auth
+def get_dominant_instID(symbol, curdate=None, code='9999'):
+    if not isinstance(symbol,str) :
+        print('symbol必须是合法产品名称')
+        return ''
+    if len(symbol) > 2 or len(symbol) < 1:
+        print('symbol必须是合法产品名称')
+        return ''
+    if curdate is None:
+        curdate = datetime.today().strftime('%Y-%m-%d')
+        
+    if isinstance(curdate, datetime) or isinstance(curdate, date):
+        curdate = curdate.strftime('%Y-%m-%d')
+   
+    if len(curdate) != 10 or not is_valid_date(curdate):
+        print(f'日期格式不对{curdate}')
+        return ''
+    curdate = curdate.replace('-','')   
+    symbol = symbol.upper() + code
+    return qedataClient.instance()('get_dominant_instID', **locals())
+
+@assert_auth
+def get_dominant_instIDs(symbols, start_date, end_date, code='9999'):
+    '''
+    get dominant instrumentID for given symbol and date
+
+    Parameters
+    ----------
+    symbols : TYPE list of String
+        such as 'AG', the symbol of underlying product
+    date : TYPE string
+        such as '2021-10-10'
+
+    Returns
+    -------
+    InstrumentID or '' if not found.
+
+    '''    
+    syms = []
+    if isinstance(symbols, str):
+        symbols = [symbols]
+    if not isinstance(symbols,list) :
+        print('symbols必须是合法合约的list')
+        return None
+    for sym in symbols:
+        if not isinstance(sym, str):
+            print('symbols必须是合法合约的list')
+            return None
+        else:
+            syms.append(sym.upper())
+    syms = json.dumps(syms)
+    if isinstance(start_date, datetime) or isinstance(start_date, date):
+        start_date = start_date.strftime('%Y-%m-%d')
+    elif  isinstance(start_date, str):
+        if len(start_date) != 10 or not is_valid_date(start_date):
+            print('start_date不是合法的日期格式 正确格式比如"2020-08-02"')
+            return None
+    if isinstance(end_date, datetime) or isinstance(end_date, date):
+        end_date = end_date.strftime('%Y-%m-%d')
+    elif  isinstance(end_date, str):
+        if len(end_date) != 10 or not is_valid_date(end_date):
+            print('end_date不是合法的日期格式 正确格式比如"2020-08-02"')
+            return None
+    del symbols    
+    return qedataClient.instance()('get_dominant_instIDs', **locals())
+
+def readProd(instid):
+    prod = instid[:2]
+    if len(instid) < 2:
+        return instid
+    if prod[1].isdigit():
+        prod = prod[:1]
+    return prod
+
+@assert_auth
+def get_instrument_setting(instid, exact_match=False):
+    instid = convert_security(instid)
+    prod = readProd(instid)
+    if instid is None:
+        return None
+        
+    elif instid[-3:] == 'SSE' :
+        if len(instid) < 11: ## stocks and funds
+        
+            res ={'instid':instid, 'marglong':100.0,'margshort':100.0,
+                  'openfeerate':4.87/10000,'closefeerate':0,'openfee':0,
+                  'closefee':0, 'closetodayrate':1, 'refprice':0,
+                  'volmult': 1, 'ticksize':0.001}
+        else: ## option
+            #longmarg = "presett+max(0.12*spreclose-max(strike-spreclose,0), 0.07*spreclose)"
+            #shortmarg = "min(presett+max(0.12*spreclose-max(spreclose-strike,0), 0.07*strike), strike)"
+            longmarg = 0
+            shortmarg = 12
+            res ={'instid':instid, 'marglong':longmarg,'margshort':shortmarg,
+                  'openfeerate':0,'closefeerate':0,'openfee':1.3,
+                  'closefee':0, 'closetodayrate':0, 'refprice':0,
+                  'volmult': 10000, 'ticksize':0.0001}
+        return res        
+    elif instid[-3:] == 'SZE' :
+        if len(instid) < 11: ## stocks and funds
+        
+            res ={'instid':instid, 'marglong':100.0,'margshort':100.0,
+                  'openfeerate':4.87/10000,'closefeerate':0,'openfee':0,
+                  'closefee':0, 'closetodayrate':1, 'refprice':0,
+                  'volmult': 1, 'ticksize':0.001}
+        else: ## option
+            #longmarg = "presett+max(0.12*spreclose-max(strike-spreclose,0), 0.07*spreclose)"
+            #shortmarg = "min(presett+max(0.12*spreclose-max(spreclose-strike,0), 0.07*strike), strike)"
+            longmarg = 0
+            shortmarg = 12
+            res ={'instid':instid, 'marglong':longmarg,'margshort':shortmarg,
+                  'openfeerate':0,'closefeerate':0,'openfee':0.45,
+                  'closefee':0, 'closetodayrate':0, 'refprice':0,
+                  'volmult': 10000, 'ticksize':0.0001}
+        return res        
+    elif prod in ["IO","MO"]:
+        longmarg = "max(premium+spreclose*0.1-max(strike-spreclose,0),premium+spreclose*0.1*0.5)"
+        shortmarg = "max(premium+spreclose*0.1-max(spreclose-strike,0),premium+spreclose*0.1*0.5)"
+        res ={'instid':instid, 'marglong':longmarg,'margshort':shortmarg,
+                  'openfeerate':0,'closefeerate':0,'openfee':15,
+                  'closefee':0, 'closetodayrate':1.0, 'refprice':15,
+                  'volmult': 100, 'ticksize':0.2}
+        return res        
+    else:
+        return qedataClient.instance()('get_instrument_setting', **locals())
+    
+
 @assert_auth
 def get_price(security, start_date, end_date, freq='minute', fields=None, overnight=False, silent=False):
     '''
