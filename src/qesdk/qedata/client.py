@@ -27,7 +27,7 @@ except:
 
 
 
-__version__='0.0.5'
+__version__='0.0.6'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
