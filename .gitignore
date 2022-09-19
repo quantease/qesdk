@@ -2,3 +2,4 @@
 /dist
 /src/qesdk.egg-info
 /olddist
+/src/qesdk/qedata/__pycache__
