@@ -20,14 +20,15 @@ import nest_asyncio
 nest_asyncio.apply()
 
 try:
-    from .config import server_config
-except:
+    from .config import outside_server_config
+    server_config = outside_server_config
+except ImportError:
     server_config = {'host' : '127.0.0.1',
                      'port' : 6001}    
 
 
 
-__version__='0.0.6'
+__version__='0.0.7'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -54,7 +55,7 @@ class qedataClient(object):
     
     def __call__(self, method, **kwargs):
         #print(kwargs)
-        asyncio.run(self.queryData(method, **kwargs))
+        return asyncio.run(self.queryData(method, **kwargs))
     
     @classmethod
     def instance(cls):
@@ -89,14 +90,14 @@ class qedataClient(object):
         #print(req.params)
         result = await client.query(req)
         
+        client.close()
         if result.status:
             msg = result.msg
             #print(msg)
-            print(pickle.loads(zlib.decompress(msg)))
+            return(pickle.loads(zlib.decompress(msg)))
         else:
-            print(result.msg)
+            return(result.msg)
             
-        client.close()
     
     @classmethod
     async def auth(cls, username, authcode):

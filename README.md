@@ -31,7 +31,7 @@ pip install -U qesdk
 #### Daily frequency
 
 ```
-from qesdk.qedata import *
+from qesdk import *
 get_price('ZN2210.SFE','2022-07-11', '2022-07-24','daily')
 ```
 
@@ -70,7 +70,7 @@ time
 #### Minute frequency
 
 ```
-from qesdk.qedata import *
+from qesdk import *
 get_price('ZN2210.SFE','2022-07-11', '2022-07-24','minute')
 ```
 
@@ -99,7 +99,7 @@ time
 #### Tick frequecy
 
 ```
-from qesdk.qedata import *
+from qesdk import *
 get_ticks('ZN2210.SFE','2022-08-21', '2022-08-24',fields=['current', 'position','volume'])
 ```
 
