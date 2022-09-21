@@ -55,7 +55,10 @@ class qedataClient(object):
     
     def __call__(self, method, **kwargs):
         #print(kwargs)
-        return asyncio.run(self.queryData(method, **kwargs))
+        if method[:4] == 'aio_':
+            return self.queryData(method[4:], **kwargs)
+        else:
+            return asyncio.run(self.queryData(method, **kwargs))
     
     @classmethod
     def instance(cls):
