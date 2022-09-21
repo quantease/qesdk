@@ -28,7 +28,7 @@ except ImportError:
 
 
 
-__version__='0.0.8'
+__version__='0.0.9'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
