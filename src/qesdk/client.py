@@ -28,7 +28,7 @@ except ImportError:
 
 
 
-__version__='0.0.7'
+__version__='0.0.8'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -55,10 +55,7 @@ class qedataClient(object):
     
     def __call__(self, method, **kwargs):
         #print(kwargs)
-        if method[:4] == 'aio_':
-            return self.queryData(method[4:], **kwargs)
-        else:
-            return asyncio.run(self.queryData(method, **kwargs))
+        return asyncio.run(self.queryData(method, **kwargs))
     
     @classmethod
     def instance(cls):
