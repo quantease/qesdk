@@ -394,6 +394,26 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         print("Error:", e.__traceback__.tb_lineno,e)
         return None
 
+@assert_auth
+def get_bar_data(instids, tradingday, count=0):
+    try:
+        assert isinstance(instids, list),'instids 必须是合约名list'
+        #tnames = [inst2tablename(inst) for inst in instids]
+        if isinstance(tradingday, str):
+            tday = tradingday.replace('-','')
+        elif isinstance(tradingday, datetime) or isinstance(tradingday, date):
+            tday = tradingday.strftime('%Ym%d')
+        else:
+            raise TypeError
+        instids = json.dumps(instids)    
+        return qedataClient.instance()('get_bar_data', **locals())    
+    except Exception as e:
+        print("Error:", e.__traceback__.tb_lineno,e)
+        return None
+        
+
+
+
 __all__ = []
 
 def _collect_func():

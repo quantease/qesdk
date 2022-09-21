@@ -95,7 +95,7 @@ async def aio_get_dominant_instID(symbol, curdate=None, code='9999'):
     return await qedataClient.instance().queryData('get_dominant_instID', **locals())
 
 @assert_auth
-async def aio_get_bar_data(instids, tradingday):
+async def aio_get_bar_data(instids, tradingday, count=0):
     try:
         assert isinstance(instids, list),'instids 必须是合约名list'
         #tnames = [inst2tablename(inst) for inst in instids]
