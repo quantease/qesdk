@@ -69,7 +69,7 @@ async def aio_get_price(security, start_date, end_date, freq='minute', fields=No
         del dfcols
         return await qedataClient.instance().queryData('get_price',**locals())
     except Exception as e:
-        print("Error:", e.__traceback__.tb_lineno,e)
+        print("aio_get_price Error:", e.__traceback__.tb_lineno,e)
         return None
 
 
@@ -108,7 +108,7 @@ async def aio_get_bar_data(instids, tradingday, count=0):
         instids = json.dumps(instids)    
         return await qedataClient.instance().queryData('get_bar_data', **locals())    
     except Exception as e:
-        print("Error:", e.__traceback__.tb_lineno,e)
+        print("aio_get_bar_data Error:", e.__traceback__.tb_lineno,e)
         return None
         
 

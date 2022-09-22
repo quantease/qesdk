@@ -58,7 +58,7 @@ def convert_end_date(end_date, freqtype=0, overnight=False):
         if freqtype != 1:
             end_date = end_date.strftime('%Y%m%d%H%M%S')
             end_dt = int(end_date) if freqtype == 0 else int(end_date + '000')
-        elif isinstance(end_date,datetime.datetime):
+        elif isinstance(end_date,datetime):
             end_dt =  int(end_date.strftime('%Y%m%d'))
             if end_date.hour >= 16:
                 end_dt += 1
@@ -153,7 +153,7 @@ def get_ticks(security, start_date, end_date, count=None, fields=None, overnight
 
         return qedataClient.instance()('get_ticks',**locals())
     except Exception as e:
-        print("Error:", e.__traceback__.tb_lineno,e)
+        print("get_tick Error:", e.__traceback__.tb_lineno,e)
         return None
 
 @assert_auth
@@ -391,7 +391,7 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         del dfcols
         return qedataClient.instance()('get_price',**locals())
     except Exception as e:
-        print("Error:", e.__traceback__.tb_lineno,e)
+        print("get_price Error:", e.__traceback__.tb_lineno,e)
         return None
 
 @assert_auth
@@ -408,7 +408,7 @@ def get_bar_data(instids, tradingday, count=0):
         instids = json.dumps(instids)    
         return qedataClient.instance()('get_bar_data', **locals())    
     except Exception as e:
-        print("Error:", e.__traceback__.tb_lineno,e)
+        print("get_bar_data Error:", e.__traceback__.tb_lineno,e)
         return None
         
 

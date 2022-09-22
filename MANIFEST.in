@@ -1,1 +1,1 @@
-recursive-include src/qesdk/qedata *.thrift
+recursive-include src/qesdk *.thrift
