@@ -28,7 +28,7 @@ except ImportError:
 
 
 
-__version__='0.0.11'
+__version__='0.0.12'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -47,6 +47,7 @@ def setTimeout(client, timeout):
    
 class qedataClient(object):
     _systoken = ''
+    _syssmtoken = ''
     _instance = None
     request_timeout = 30*1000
     
@@ -54,7 +55,9 @@ class qedataClient(object):
         pass
     
     def __call__(self, method, **kwargs):
+        #print(method)
         #print(kwargs)
+        #print(self._syssmtoken)
         return asyncio.run(self.queryData(method, **kwargs))
     
     @classmethod
@@ -69,6 +72,11 @@ class qedataClient(object):
         #print('auth',token)
         return token != ''
             
+    @classmethod
+    def check_login(cls):
+        smtoken = cls._syssmtoken
+        #print('auth',token)
+        return smtoken != ''
     
     
     async def echo(self, name):
@@ -82,12 +90,16 @@ class qedataClient(object):
     async def queryData(self, method, **kwargs):
         client = await make_aio_client(
             qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=self.request_timeout)
+        #print('qeryData')
         setTimeout(client, self.request_timeout)
         req = qedata_thrift.St_Query_Req()
         req.method_name = method
         req.params = zlib.compress(msgpack.dumps(kwargs,use_bin_type=True))
-        req.token=self._systoken
-        #print(req.params)
+        if "sm_get" in method:
+            req.token = self._syssmtoken
+        else:    
+            req.token=self._systoken
+        #print('token',req.token)
         result = await client.query(req)
         
         client.close()
@@ -98,10 +110,24 @@ class qedataClient(object):
         else:
             return(result.msg)
             
+    @classmethod
+    async def login(cls, username, password):
+        client = await make_aio_client(
+            qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
+        setTimeout(client, cls.request_timeout)
+        result = await client.login(username, password, get_mac_address(), __version__)
+        #print(result)
+        if result.status:
+            cls._syssmtoken = result.msg
+            print(result.msg, cls._syssmtoken)
+            print('AUTH SUCCEED')
+        else:
+            print(f'AUTH FAILED : {result.msg}')
+            
+        client.close()
     
     @classmethod
     async def auth(cls, username, authcode):
-        global systoken
         client = await make_aio_client(
             qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
         setTimeout(client, cls.request_timeout)
@@ -117,6 +143,9 @@ class qedataClient(object):
     
 def auth(username, authcode):
     asyncio.run(qedataClient.auth(username, authcode))
+
+def login(username, password):
+    asyncio.run(qedataClient.login(username, password))
     
     
 def testClient():

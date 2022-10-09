@@ -6,7 +6,7 @@ Created on Thu Sep  1 23:42:18 2022
 """
 import re
 from .client import qedataClient
-from .utils import *
+from .utils import assert_auth, get_mac_address
 import pandas as pd
 import numpy as np
 import json
@@ -411,7 +411,33 @@ def get_bar_data(instids, tradingday, count=0):
         print("get_bar_data Error:", e.__traceback__.tb_lineno,e)
         return None
         
+##############################stratmarket############################
+def sm_get_clone_strat_list():
+    try:
+        #print('get_clone_strat_list')
+        if not qedataClient.check_login():
+            print('您需要先用login函数登录策略超市')
+            return None
+        else:
+            #print('enter api')
+            return qedataClient.instance()('sm_get_clone_strat_list', **locals())
+    
+    except Exception as e:
+        print("get_clone_strat_list Error:", e.__traceback__.tb_lineno,e)
 
+def sm_get_clone_strat_position(strats:list):
+    try:
+        assert isinstance(strats,list), 'strats必须是策略名列表'
+        strats = json.dumps(strats)
+        if not qedataClient.check_login():
+            print('您需要先用login函数登录策略超市')
+            return None
+        else:
+            return qedataClient.instance()('sm_get_clone_strat_position', **locals())
+    
+    except Exception as e:
+        print("get_clone_strat_position Error:", e.__traceback__.tb_lineno,e)
+    
 
 
 __all__ = []
@@ -419,10 +445,10 @@ __all__ = []
 def _collect_func():
     funcs = []
     for func in globals().keys():
-        if func.startswith("get"):
+        if func.startswith("get") or func.startswith("sm_get"):
             funcs.append(func)
     return funcs
 
 __all__.extend(_collect_func())
-
+#print(__all__)
 del _collect_func

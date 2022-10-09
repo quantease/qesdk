@@ -19,7 +19,9 @@ def assert_auth(func):
     def _wrapper(*args, **kwargs):
         from .client import qedataClient
         if not qedataClient.check_auth():
+            #print('wraped')
             print('您还没有获得授权，请先登录https://quantease.cn官网,点击右上角“授权码”获取授权码，操作可参考https://quantease.cn/newdoc/auth.html')
         else:
             return func(*args, **kwargs)
     return _wrapper
+
