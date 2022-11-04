@@ -23,7 +23,7 @@ try:
     from .config import outside_server_config
     server_config = outside_server_config
 except ImportError:
-    server_config = {'host' : '127.0.0.1',
+    server_config = {'host' : '192.168.123.13',
                      'port' : 6001}    
 
 

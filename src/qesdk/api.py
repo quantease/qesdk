@@ -286,6 +286,17 @@ def readProd(instid):
     return prod
 
 @assert_auth
+def get_realtime_minute_prices(insts):
+    if isinstance(insts, str):
+        insts = [insts]
+    if not isinstance(insts,list) :
+        print('insts必须是合法合约的list')
+        return None
+    instids = json.dumps(insts)
+    del insts
+    return qedataClient.instance()('get_realtime_minute_prices', **locals())
+    
+@assert_auth
 def get_instrument_setting(instid, exact_match=False):
     instid = convert_security(instid)
     prod = readProd(instid)
