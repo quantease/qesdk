@@ -127,4 +127,4 @@ time
 
 ## More details
 
-The detail document could be obtained on https://quantease.cn/newdoc
+The detail document could be obtained on https://quantease.cn/newdoc/qesdk.html
