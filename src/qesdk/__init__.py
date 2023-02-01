@@ -11,7 +11,7 @@ sys.modules["ROOT_DIR"] = os.path.abspath(os.path.dirname(__file__))
 
 from .api import *
 from .aio_api import *
-from .client import testClient, auth,login
+from .client import testClient, auth,login,check_auth
 from .client import __version__
 
 
@@ -21,6 +21,7 @@ __all__ = [
     "auth",
     "testClient",
     "login",
+    "check_auth",
     "__version__"
 ]
 __all__.extend(api.__all__)

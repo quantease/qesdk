@@ -421,6 +421,71 @@ def get_bar_data(instids, tradingday, count=0):
     except Exception as e:
         print("get_bar_data Error:", e.__traceback__.tb_lineno,e)
         return None
+
+@assert_auth
+def get_broker_info(broker):
+    try:
+        assert isinstance(broker, str),'broker需要是合法的期货公司代码字符串'
+        return qedataClient.instance()('get_broker_info', **locals())
+
+    except Exception as e:
+        print("get_broker_info Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+@assert_auth
+def get_valid_instID(instid):
+    try:
+        assert isinstance(instid, str) and len(instid)>=5,'instid需要是合法的合约代码字符串'
+        inst = instid
+        prod = inst[:2]
+        if prod[1].isdigit():
+            prod = inst[:1]
+        if instid.find('9999') >= 0:
+            return get_dominant_instID(prod)
+        elif instid.find('9998') >= 0:
+            return get_dominant_instID(prod,code='9998')
+        else:
+            return qedataClient.instance()('get_valid_instID', **locals())
+
+    except Exception as e:
+        print("get_valid_instID Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+@assert_auth
+def is_valid_instID(instid):
+    try:
+        assert isinstance(instid, str) and len(instid)>=9,'instid需要是合法的合约代码字符串'
+        instid = instid.upper()
+        instid = instid.replace('.','_')
+        instid = instid.replace('-','_')
+        if instid.find('(T+D)') >= 0:
+            instid.replace('(T+D)','_T_D')
+        if instid in ['510300_SSE','510050_SSE']:
+            return True
+        elif instid in ['AG_T_D_SGE','AU_T_D_SGE','AU99_99_SGE','MAU_T_D_SGE']:
+            return True
+        else:
+            return qedataClient.instance()('is_valid_instID', **locals())
+
+    except Exception as e:
+        print("is_valid_instID Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+@assert_auth
+def is_valid_trade_time(instid, curtime):
+    try:
+        assert isinstance(instid, str) and len(instid)>=9,'instid需要是合法的合约代码字符串'
+        assert isinstance(curtime, datetime), 'curtime必须是datetime类型'
+        weekday = curtime.weekday()
+        timenum = curtime.hour * 100 + curtime.minute
+        del curtime
+        return qedataClient.instance()('is_valid_trade_time', **locals())
+
+    except Exception as e:
+        print("is_valid_trade_time Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+
         
 ##############################stratmarket############################
 def sm_get_clone_strat_list():
@@ -456,7 +521,7 @@ __all__ = []
 def _collect_func():
     funcs = []
     for func in globals().keys():
-        if func.startswith("get") or func.startswith("sm_get"):
+        if func.startswith("get") or func.startswith("sm_get") or func.startswith("is_"):
             funcs.append(func)
     return funcs
 

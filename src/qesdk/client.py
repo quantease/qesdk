@@ -146,6 +146,9 @@ def auth(username, authcode):
 
 def login(username, password):
     asyncio.run(qedataClient.login(username, password))
+
+def check_auth():
+    return qedataClient.check_auth()
     
     
 def testClient():
