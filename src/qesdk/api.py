@@ -485,7 +485,14 @@ def is_valid_trade_time(instid, curtime):
         print("is_valid_trade_time Error:", e.__traceback__.tb_lineno,e)
         return None
 
+#########################algo trades#####################################
+@assert_auth
+def get_package_address(plugin, plat, version, macaddr):
+        return qedataClient.instance()('get_package_address', **locals())
 
+@assert_auth
+def get_plugin_permission(plugin, plat, version, macaddr, key, signval):
+        return qedataClient.instance()('get_plugin_permission', **locals())
         
 ##############################stratmarket############################
 def sm_get_clone_strat_list():
@@ -514,6 +521,7 @@ def sm_get_clone_strat_position(strats:list):
     except Exception as e:
         print("get_clone_strat_position Error:", e.__traceback__.tb_lineno,e)
     
+
 
 
 __all__ = []
