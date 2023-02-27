@@ -12,7 +12,7 @@ import numpy as np
 import json
 from datetime import datetime, date, timedelta
 
-validExIDs = ['SSE','SZE','SFE',"INE","DCE","ZCE","CCF","SGE"]
+validExIDs = ['SSE','SZE','SFE',"INE","DCE","ZCE","CCF","SGE","GFE"]
 
 def convert_security(security):
     insts = security.split('.')
@@ -163,7 +163,7 @@ def get_securities_list(stype="all",dateWindow=None, exchange="all"):
         print("stype不合法, 合法值如下： [\'all\', \'options\', \'futures\']")
         
         return None
-    validExchanges =['DCE', 'SSE',"SFE","ZCE","INE","CCF","ALL"]
+    validExchanges =['DCE', 'SSE',"SFE","ZCE","INE","CCF","GFE","ALL"]
     exID = exchange.upper()
     if not exID in validExchanges:
         print("exchange不合法, 合法值如下:", validExchanges)
@@ -484,6 +484,48 @@ def is_valid_trade_time(instid, curtime):
     except Exception as e:
         print("is_valid_trade_time Error:", e.__traceback__.tb_lineno,e)
         return None
+
+@assert_auth
+def get_product_spot_price(symbol, start_date, end_date):
+    try:
+        if isinstance(start_date, datetime):
+            start_date = start_date.strftime('%Y-%m-%d')
+        elif isinstance(start_date, str):
+            if len(start_date) != 10 or not is_valid_date(start_date):
+                print('Invalid start_date')
+                return None
+        if isinstance(end_date, datetime) :
+            end_date = end_date.strftime('%Y-%m-%d')
+        elif isinstance(end_date, str):
+            if len(end_date) != 10 or not is_valid_date(end_date):
+                print('Invalid end_date')
+                return None
+        return qedataClient.instance()('get_product_spot_price', **locals())
+    except Exception as e:
+        print("get_product_spot_price Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+@assert_auth
+def get_product_invent_orders(symbol, start_date, end_date):
+    try:
+        if isinstance(start_date, datetime):
+            start_date = start_date.strftime('%Y-%m-%d')
+        elif isinstance(start_date, str):
+            if len(start_date) != 10 or not is_valid_date(start_date):
+                print('Invalid start_date')
+                return None
+        if isinstance(end_date, datetime):
+            end_date = end_date.strftime('%Y-%m-%d')
+        elif isinstance(end_date, str):
+            if len(end_date) != 10 or not is_valid_date(end_date):
+                print('Invalid end_date')
+                return None
+        return qedataClient.instance()('get_product_invent_orders', **locals())
+    except Exception as e:
+        print("get_product_invent_orders Error:", e.__traceback__.tb_lineno,e)
+        return None
+
+
 
 #########################algo trades#####################################
 @assert_auth
