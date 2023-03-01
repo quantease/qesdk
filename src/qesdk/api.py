@@ -563,7 +563,71 @@ def sm_get_clone_strat_position(strats:list):
     except Exception as e:
         print("get_clone_strat_position Error:", e.__traceback__.tb_lineno,e)
     
+@assert_auth
+def get_instrument_broker_ranking(instid, curdate, rankname):
+    valid_rankname = ['tradevol',
+                      'longpos',
+                      'longpos_add',
+                      'longpos_reduce',
+                      'longpos_net',
+                      'shortpos',
+                      'shortpos_add',
+                      'shortpos_reduce',
+                      'shortpos_net']
+    if not rankname in valid_rankname:
+        print(f'不合法的rankname:{rankname}, rankname可以是{valid_rankname}')
+        return None
+    insts = instid.split('.')
+    instID = insts[0].upper()
 
+    if isinstance(curdate, datetime) or isinstance(curdate, date):
+        curdate = curdate.strftime('%Y-%m-%d')
+    elif isinstance(curdate, str):
+        if len(curdate) != 10 or not is_valid_date(curdate):
+            print('Invalid curdate')
+            return None
+    del insts
+    return qedataClient.instance()('get_instrument_broker_ranking', **locals())
+    
+@assert_auth
+def get_instrument_broker_holding(broker, instid, start_date, end_date):
+    insts = instid.split('.')
+    instID = insts[0].upper()
+
+    if isinstance(start_date, datetime) or isinstance(start_date, date):
+        start_date = start_date.strftime('%Y-%m-%d')
+    elif isinstance(start_date, str):
+        if len(start_date) != 10 or not is_valid_date(start_date):
+            print('Invalid start_date')
+            return None
+    if isinstance(end_date, datetime) or isinstance(end_date, date):
+        end_date = end_date.strftime('%Y-%m-%d')
+    elif isinstance(end_date, str):
+        if len(end_date) != 10 or not is_valid_date(end_date):
+            print('Invalid end_date')
+            return None
+    del insts        
+    return qedataClient.instance()('get_instrument_broker_holding', **locals())
+    
+@assert_auth
+def get_instrument_broker_pnl(broker, instid, start_date, end_date):
+    insts = instid.split('.')
+    instID = insts[0].upper()
+
+    if isinstance(start_date, datetime) or isinstance(start_date, date):
+        start_date = start_date.strftime('%Y-%m-%d')
+    elif isinstance(start_date, str):
+        if len(start_date) != 10 or not is_valid_date(start_date):
+            print('Invalid start_date')
+            return None
+    if isinstance(end_date, datetime) or isinstance(end_date, date):
+        end_date = end_date.strftime('%Y-%m-%d')
+    elif isinstance(end_date, str):
+        if len(end_date) != 10 or not is_valid_date(end_date):
+            print('Invalid end_date')
+            return None
+    del insts        
+    return qedataClient.instance()('get_instrument_broker_pnl', **locals())
 
 
 __all__ = []
