@@ -117,14 +117,16 @@ class qedataClient(object):
         setTimeout(client, cls.request_timeout)
         result = await client.login(username, password, get_mac_address(), __version__)
         #print(result)
+        client.close()
         if result.status:
             cls._syssmtoken = result.msg
             print(result.msg, cls._syssmtoken)
-            print('AUTH SUCCEED')
+            print('LOGIN SUCCEED')
+            return True
         else:
-            print(f'AUTH FAILED : {result.msg}')
+            print(f'LOGIN FAILED : {result.msg}')
+            return False
             
-        client.close()
     
     @classmethod
     async def auth(cls, username, authcode):
@@ -133,13 +135,15 @@ class qedataClient(object):
         setTimeout(client, cls.request_timeout)
         result = await client.auth(username, authcode, True, get_mac_address(), __version__)
         #print(result)
+        client.close()
         if result.status:
             cls._systoken = result.msg
             print('AUTH SUCCEED')
+            return True
         else:
             print(f'AUTH FAILED : {result.msg}')
+            return False
             
-        client.close()
     
 def auth(username, authcode):
     asyncio.run(qedataClient.auth(username, authcode))

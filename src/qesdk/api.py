@@ -286,6 +286,10 @@ def readProd(instid):
     return prod
 
 @assert_auth
+def get_all_products():
+    return qedataClient().instance()('get_all_products',**locals())
+
+@assert_auth
 def get_realtime_minute_prices(insts):
     if isinstance(insts, str):
         insts = [insts]
