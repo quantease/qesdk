@@ -28,7 +28,7 @@ except ImportError:
 
 
 
-__version__='0.1.0'
+__version__='0.1.3'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -146,10 +146,10 @@ class qedataClient(object):
             
     
 def auth(username, authcode):
-    asyncio.run(qedataClient.auth(username, authcode))
+    return asyncio.run(qedataClient.auth(username, authcode))
 
 def login(username, password):
-    asyncio.run(qedataClient.login(username, password))
+    return asyncio.run(qedataClient.login(username, password))
 
 def check_auth():
     return qedataClient.check_auth()

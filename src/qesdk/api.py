@@ -409,19 +409,77 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         print("get_price Error:", e.__traceback__.tb_lineno,e)
         return None
 
+
+
 @assert_auth
-def get_bar_data(instids, tradingday, count=0):
+def get_bar_data(instids, tradingday, count=0, freq=1):
     try:
         assert isinstance(instids, list),'instids 必须是合约名list'
         #tnames = [inst2tablename(inst) for inst in instids]
         if isinstance(tradingday, str):
             tday = tradingday.replace('-','')
+            if tday == '':
+                tday = datetime.now().strftime('%Y%m%d')
         elif isinstance(tradingday, datetime) or isinstance(tradingday, date):
             tday = tradingday.strftime('%Ym%d')
         else:
             raise TypeError
         instids = json.dumps(instids)    
-        return qedataClient.instance()('get_bar_data', **locals())    
+        lcount = count
+        if freq != 1:
+            count = 0
+        data = qedataClient.instance()('get_bar_data', **locals())
+       #print(data)
+        if data:
+                f=str(freq)+'min'
+                for instid in data.keys():  
+                    df=data[instid]
+                    if len(df) > 0:
+                        #print(df.time)
+                        df['runtime']= pd.to_datetime(df.time, format='%Y%m%d%H%M%S',errors='ignore')
+                        #for i in range(len(df['time'])):
+                        #    df['runtime'].loc[i]=datetime.datetime.strptime(str(df['time'].loc[i]), "%Y%m%d%H%M%S")
+                        df.set_index(["runtime"], inplace=True)
+                        #print(df)
+                        if f=='1min':
+                            del data[instid]['time']
+                        else:
+                            df2 = pd.DataFrame(columns=df.columns)
+                            #print('111',df2)
+                            for col in df.columns:
+                                tmp = pd.Series(index=df.index, data=df.loc[:,col])
+                                if col == "open":
+                                    tmp=df[col].resample(f, label='right', closed='right').first()
+                                elif col =="close":
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'high':
+                                    tmp=df[col].resample(f, label='right', closed='right').max()
+                                elif col == 'low':
+                                    tmp=df[col].resample(f, label='right', closed='right').min()
+                                elif col == 'volume':
+                                    tmp=df[col].resample(f, label='right', closed='right').sum()
+                                elif col == 'money':
+                                    tmp=df[col].resample(f, label='right', closed='right').sum()
+                                elif col == 'position':
+                                    tmp = df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'presett':
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'preclose':
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'lowerlimit':
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'upperlimit':
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                elif col == 'tradingday':
+                                    tmp=df[col].resample(f, label='right', closed='right').last()
+                                df2.loc[:,col] = tmp
+                            #print(df2)
+                            del df2['time']
+                            if isinstance(lcount, int) and lcount > 0:
+                                data[instid]=df2.dropna(how='any').iloc[-lcount:,]
+                            else:
+                                data[instid]=df2.dropna(how='any')
+        return data
     except Exception as e:
         print("get_bar_data Error:", e.__traceback__.tb_lineno,e)
         return None
