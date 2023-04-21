@@ -691,13 +691,17 @@ def get_instrument_broker_pnl(broker, instid, start_date, end_date):
     del insts        
     return qedataClient.instance()('get_instrument_broker_pnl', **locals())
 
+@assert_auth
+def update_public_ip(hostip):
+    return qedataClient.instance()('update_public_ip', **locals())
+
 
 __all__ = []
 
 def _collect_func():
     funcs = []
     for func in globals().keys():
-        if func.startswith("get") or func.startswith("sm_get") or func.startswith("is_"):
+        if func.startswith("get") or func.startswith("sm_get") or func.startswith("is_") or func.startswith("update_"):
             funcs.append(func)
     return funcs
 
