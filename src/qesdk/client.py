@@ -20,15 +20,17 @@ import nest_asyncio
 nest_asyncio.apply()
 
 try:
-    from .config import outside_server_config
-    server_config = outside_server_config
+    from .config import outside_server_config, second_server_config
+    avail_servers = [outside_server_config, second_server_config]
+    server_config = avail_servers[0]
+    server_index = 0
 except ImportError:
-    server_config = {'host' : '192.168.123.13',
-                     'port' : 6001}    
+    server_config = {'host' : '192.168.123.199',
+                     'port' : 6001}  
+    
 
 
-
-__version__='0.1.4'
+__version__='0.1.6'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -88,61 +90,95 @@ class qedataClient(object):
         client.close()
     
     async def queryData(self, method, **kwargs):
-        client = await make_aio_client(
-            qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=self.request_timeout)
+        try:
+            client = await make_aio_client(
+                qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=self.request_timeout)
+        except Exception as e:
+            if len(avail_servers) > 1:
+                server_index = (server_index + 1) % len(avail_servers)
+                server_config = avail_servers[server_index]
+                client = await make_aio_client(qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=self.request_timeout)
+            else:
+                return f'ERROR: {e}'
         #print('qeryData')
-        setTimeout(client, self.request_timeout)
-        req = qedata_thrift.St_Query_Req()
-        req.method_name = method
-        req.params = zlib.compress(msgpack.dumps(kwargs,use_bin_type=True))
-        if "sm_get" in method:
-            req.token = self._syssmtoken
-        else:    
-            req.token=self._systoken
-        #print('token',req.token)
-        result = await client.query(req)
-        
-        client.close()
-        if result.status:
-            msg = result.msg
-            #print(msg)
-            return(pickle.loads(zlib.decompress(msg)))
-        else:
-            return(result.msg)
+        try:
+            setTimeout(client, self.request_timeout)
+            req = qedata_thrift.St_Query_Req()
+            req.method_name = method
+            req.params = zlib.compress(msgpack.dumps(kwargs,use_bin_type=True))
+            if "sm_get" in method:
+                req.token = self._syssmtoken
+            else:    
+                req.token=self._systoken
+            #print('token',req.token)
+            result = await client.query(req)
+            
+            client.close()
+            if result.status:
+                msg = result.msg
+                #print(msg)
+                return(pickle.loads(zlib.decompress(msg)))
+            else:
+                return(result.msg)
+        except Exception as e:
+            return f'ERROR: {e}'
             
     @classmethod
     async def login(cls, username, password):
-        client = await make_aio_client(
-            qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
-        setTimeout(client, cls.request_timeout)
-        result = await client.login(username, password, get_mac_address(), __version__)
-        #print(result)
-        client.close()
-        if result.status:
-            cls._syssmtoken = result.msg
-            print(result.msg, cls._syssmtoken)
-            print('LOGIN SUCCEED')
-            return True
-        else:
-            print(f'LOGIN FAILED : {result.msg}')
-            return False
-            
+        try:
+            client = await make_aio_client(
+                qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
+        except Exception as e:
+            if len(avail_servers) > 1:
+                server_index = (server_index + 1) % len(avail_servers)
+                server_config = avail_servers[server_index]
+                client = await make_aio_client(qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
+            else:
+                return f'ERROR: {e}'
+        try:                
+            setTimeout(client, cls.request_timeout)
+            result = await client.login(username, password, get_mac_address(), __version__)
+            #print(result)
+            client.close()
+            if result.status:
+                cls._syssmtoken = result.msg
+                print(result.msg, cls._syssmtoken)
+                print('LOGIN SUCCEED')
+                return True
+            else:
+                print(f'LOGIN FAILED : {result.msg}')
+                return False
+        except Exception as e:
+            return f'ERROR: {e}'    
     
     @classmethod
     async def auth(cls, username, authcode):
-        client = await make_aio_client(
-            qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
-        setTimeout(client, cls.request_timeout)
-        result = await client.auth(username, authcode, True, get_mac_address(), __version__)
-        #print(result)
-        client.close()
-        if result.status:
-            cls._systoken = result.msg
-            print('AUTH SUCCEED')
-            return True
-        else:
-            print(f'AUTH FAILED : {result.msg}')
-            return False
+        try:
+            client = await make_aio_client(
+                qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
+        except Exception as e:
+            if len(avail_servers) > 1:
+                server_index = (server_index + 1) % len(avail_servers)
+                server_config = avail_servers[server_index]
+                client = await make_aio_client(qedata_thrift.TestService, server_config['host'],  server_config['port'],timeout=cls.request_timeout)
+            else:
+                return f'ERROR: {e}'
+        try:                
+            setTimeout(client, cls.request_timeout)
+            result = await client.auth(username, authcode, False, get_mac_address(), __version__)
+            #print(result)
+            client.close()
+            if result.status:
+                cls._systoken = result.msg
+                print('AUTH SUCCEED')
+                return True
+            else:
+                print(f'AUTH FAILED : {result.msg}')
+                return False
+        except Exception as e:
+            return f'ERROR: {e}'                
+                
+
             
     
 def auth(username, authcode):

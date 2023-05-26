@@ -6,5 +6,5 @@ Created on Mon Sep  5 16:55:42 2022
 """
 
 
-outside_server_config = {"host": '103.36.172.183',
-                 'port': 6001}
+outside_server_config = {"host": 'data.quantease.store','port': 6001}
+second_server_config = {"host": 'quantease.store','port': 6001}
