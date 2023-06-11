@@ -696,6 +696,11 @@ def update_public_ip(hostip):
     return qedataClient.instance()('update_public_ip', **locals())
 
 
+@assert_auth
+def get_risk_control_parameter():
+    return qedataClient.instance()('get_risk_control_parameter', **locals())
+
+
 __all__ = []
 
 def _collect_func():
