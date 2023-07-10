@@ -354,7 +354,7 @@ def get_instrument_setting(instid, exact_match=False):
     
 
 @assert_auth
-def get_price(security, start_date, end_date, freq='minute', fields=None, overnight=False, silent=False):
+def get_price(security, start_date, end_date, freq='minute', fields=None, overnight=False, silent=False, adjustFactor=None):
     '''
     Get the bar structure data.  
     security: such as \'AG2001.SFE\' 
@@ -370,15 +370,28 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         print(f"freq {freq} 不合法, 合法的频率设置如下：'minute','hour','daily','XT','XB'")
         return None
     security = convert_security(security)
+
     if security is None:
         return
-    
+    isStock = security[-3:] in ['SSE','SZE']
+
+
     if freqtype == 1:
-        dfcols = ['open','close','high','low','volume','money','position','upperlimit','lowerlimit','presett','preclose','settle']
+        if isStock:
+            dfcols = ['open', 'close', 'high', 'low', 'volume', 'money', 'upperlimit', 'lowerlimit',
+                    'preclose', 'accumAdjFactor']
+        else:
+            dfcols = ['open', 'close', 'high', 'low', 'volume', 'money', 'position', 'upperlimit', 'lowerlimit', 'presett',
+                    'preclose', 'settle']
     else:
         dfcols = ['open','close','high','low','volume','money']
     
     try:
+        if isStock :
+            if not adjustFactor is None:
+                assert adjustFactor in ['pre','post'], "adjustFactor 必须为'pre'前复权或'post'后复权"
+            else:
+                adjustFactor = 'none'    
         if fields :
            assert isinstance(fields,list) and len(fields) > 0, "fields 必须为list类型，并且不能为空."
            dfcols = [f for f in fields if f in dfcols]
@@ -390,8 +403,9 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         if not end_date:
             return None
     
-           
-        if len(security) >= 14:
+        if isStock:
+                dbname = "stocks_daily" if freqtype == 1 else "stocks_minu"           
+        elif len(security) >= 14:
             if security[-3:] == 'CCF':
                 dbname = "options_ccf_daily" if freqtype == 1 else "options_ccf_minu"
             else:
@@ -404,6 +418,7 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         else:
             dbname = "futures_daily" if freqtype == 1 else "futures_minu"
         del dfcols
+        print(dbname)
         return qedataClient.instance()('get_price',**locals())
     except Exception as e:
         print("get_price Error:", e.__traceback__.tb_lineno,e)
