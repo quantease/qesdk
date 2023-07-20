@@ -25,7 +25,7 @@ nest_asyncio.apply()
 
 try:
     from .config import outside_server_config, second_server_config
-    avail_servers = [outside_server_config, second_server_config]
+    avail_servers = [outside_server_config] #[outside_server_config, second_server_config]
     server_config = avail_servers[0]
     server_index = 0
 except ImportError:
@@ -37,7 +37,7 @@ except ImportError:
     
 
 
-__version__='0.1.8'
+__version__='0.1.10'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)

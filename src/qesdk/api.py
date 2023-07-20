@@ -418,7 +418,7 @@ def get_price(security, start_date, end_date, freq='minute', fields=None, overni
         else:
             dbname = "futures_daily" if freqtype == 1 else "futures_minu"
         del dfcols
-        print(dbname)
+        #print(dbname)
         return qedataClient.instance()('get_price',**locals())
     except Exception as e:
         print("get_price Error:", e.__traceback__.tb_lineno,e)
