@@ -37,7 +37,7 @@ except ImportError:
     
 
 
-__version__='0.1.10'
+__version__='0.1.11'
 
 thrift_path = path.join(sys.modules["ROOT_DIR"], "qedata.thrift")
 thrift_path = path.abspath(thrift_path)
@@ -109,20 +109,21 @@ class qedataClient(object):
     @classmethod
     async def getClient(cls):
         global server_config, server_index, avail_servers
-        try:
-            client = await make_aio_client(
-                qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=cls.request_timeout)
-        except Exception as e:
-            if len(avail_servers) > 1:
-                server_index = (server_index + 1) % len(avail_servers)
-                server_config = avail_servers[server_index]
-                client = await make_aio_client(qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=cls.request_timeout,\
-                    )
-    #,trans_factory=TFramedTransportFactory())
-            else:
-                print(f'ERROR: {e}')
-                return None
-        return client
+        retry_count = 3
+        while retry_count > 0:
+            try:
+                client = await make_aio_client(
+                    qedata_thrift.TestService, server_config['host'],  server_config['port'], timeout=cls.request_timeout)
+                return client
+            except Exception as e:
+                retry_count -= 1
+                if retry_count == 0:
+                    print(f'ERROR: {e}')
+                    return None
+                else:
+                    print(f'Connect failed, retrying...')
+
+
 
     async def echo(self, name):
         global server_config
@@ -132,7 +133,7 @@ class qedataClient(object):
             result = await client.echo(name)
             print(result,self._systoken)
             client.close()
-    
+
     async def queryData(self, method, **kwargs):
         global server_config, server_index, avail_servers
         try:
